@@ -1,0 +1,11 @@
+# Compiled Java
+*.class
+project/java/classes/
+
+# Archives / packaged copies
+*.zip
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
