@@ -53,7 +53,10 @@ public class Cafe {
       System.out.print("Connecting to database...");
       try{
          // constructs the connection URL
-         String url = "jdbc:postgresql://localhost:" + dbport + "/" + dbname;
+         // Host defaults to localhost; in Docker it's set via the DB_HOST env var.
+         String host = System.getenv("DB_HOST");
+         if (host == null || host.isEmpty()) host = "localhost";
+         String url = "jdbc:postgresql://" + host + ":" + dbport + "/" + dbname;
          System.out.println ("Connection URL: " + url + "\n");
 
          // obtain a physical connection

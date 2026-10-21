@@ -1,0 +1,35 @@
+# Two services: a PostgreSQL database (auto-loaded with the schema + data) and
+# the Java app. Start the app with:
+#
+#   docker compose run --rm app
+#
+# That boots the db, waits for it to be ready, then drops you into the café
+# program. Ctrl+C / option 9 to exit; `docker compose down` to stop the db.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: cafe
+      POSTGRES_DB: cafe
+      POSTGRES_HOST_AUTH_METHOD: trust   # no password needed on this local network
+    volumes:
+      # Schema and data load automatically on first startup, in this order:
+      - ./project/sql/src/create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql:ro
+      - ./project/sql/src/create_indexes.sql:/docker-entrypoint-initdb.d/02_create_indexes.sql:ro
+      - ./project/sql/src/load_data.sql:/docker-entrypoint-initdb.d/03_load_data.sql:ro
+      - ./project/data:/data:ro           # the CSVs that load_data.sql COPYs from
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cafe -d cafe"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy   # wait until the database is ready
+    environment:
+      DB_HOST: db
+    stdin_open: true   # the app is an interactive menu...
+    tty: true          # ...so it needs a terminal

@@ -55,28 +55,35 @@ project/
 └── data/                    # seed CSVs (users, menu, orders, item status)
 ```
 
-## Running it
+## Running it with Docker (recommended)
 
-The project targets PostgreSQL and was originally run in UCR's lab
-environment. To run it elsewhere you need a local PostgreSQL server and a JDK,
-then:
+The whole thing — a PostgreSQL database loaded with the schema and seed data,
+plus the Java app — runs in Docker, so you don't install PostgreSQL, a JDK, or
+a JDBC driver yourself. You only need
+[Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-1. **Create and load the database** (set `PGPORT` and `USER` for your setup):
-   ```bash
-   cd project/sql/scripts
-   ./create_db.sh
-   ```
-2. **Compile and run the app:**
-   ```bash
-   cd project/java/scripts
-   ./compile.sh
-   ```
+From the repository root:
 
-> **Note:** `compile.sh` currently hardcodes a Java path from the UCR lab
-> (`/usr/csshare/pkgs/jdk1.7.0_17`) and the project ships an older PostgreSQL
-> JDBC driver. You'll need to point it at your own JDK and, ideally, a current
-> driver. A containerized setup (PostgreSQL + the app in Docker) is planned so
-> it runs anywhere with one command.
+```bash
+docker compose run --rm app
+```
+
+That builds the app, starts the database (which auto-loads the schema and the
+seed CSVs on first run), waits until it's ready, and then drops you into the
+café menu. Exit with menu option `9` (or Ctrl+C). To stop the database
+afterward, run `docker compose down`.
+
+> The first run takes a few minutes: it downloads the PostgreSQL image and the
+> JDBC driver and loads ~28k users / 87k orders / 130k status rows. Later runs
+> are quick. The database keeps its data in a Docker volume between runs.
+
+### Running it manually (without Docker)
+
+The project was originally run in UCR's lab environment with a local PostgreSQL
+server and a JDK. `project/sql/scripts/create_db.sh` loads the schema/data and
+`project/java/scripts/compile.sh` compiles and runs the app — but note that
+`compile.sh` hardcodes a UCR lab Java path and the repo ships an old JDBC
+driver, so the Docker path above is the reliable way to run it today.
 
 ## Known limitations
 

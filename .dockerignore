@@ -1,0 +1,6 @@
+# The app image only needs the Java source; keep the context small.
+.git
+project/data
+project/java/lib
+project/java/classes
+*.md
